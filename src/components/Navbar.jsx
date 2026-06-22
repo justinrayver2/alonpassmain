@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Ship, LogOut, User, Menu, X } from 'lucide-react';
+import { Ship, LogOut, User, Menu, X, Home } from 'lucide-react';
 
 export default function Navbar({ user, setUser }) {
   const navigate = useNavigate();
@@ -22,6 +22,10 @@ export default function Navbar({ user, setUser }) {
         {user && (
           <>
             <div className="navbar-actions desktop-actions">
+              <Link to="/" className="btn" style={{ background: 'transparent', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
+                <Home size={18} />
+                <span style={{ fontWeight: 500 }}>Home</span>
+              </Link>
               <div className="user-profile-badge">
                 <div className="user-avatar">
                   {user.fullName ? user.fullName.charAt(0).toUpperCase() : <User size={16} />}
@@ -52,6 +56,10 @@ export default function Navbar({ user, setUser }) {
           {/* Portal Target for Dashboard Tabs */}
           <div id="mobile-tabs-portal" className="mobile-tabs-container" onClick={() => setIsMobileMenuOpen(false)}></div>
 
+          <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="btn" style={{ background: 'transparent', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', width: '100%', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', marginBottom: '1rem' }}>
+            <Home size={18} />
+            <span style={{ fontWeight: 500 }}>Home</span>
+          </Link>
           <div className="user-profile-badge mobile-badge">
             <div className="user-avatar">
               {user.fullName ? user.fullName.charAt(0).toUpperCase() : <User size={16} />}

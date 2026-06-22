@@ -76,18 +76,14 @@ function App() {
       <Routes>
         <Route 
           path="/" 
-          element={
-            user 
-              ? <Navigate to={user.role === 'admin' ? '/admin' : user.role === 'cashier' ? '/cashier' : '/dashboard'} replace /> 
-              : <LandingPage />
-          } 
+          element={<LandingPage user={user} />} 
         />
         
         <Route 
           path="/auth" 
           element={
             user 
-              ? <Navigate to="/" replace /> 
+              ? <Navigate to={user.role === 'admin' ? '/admin' : user.role === 'cashier' ? '/cashier' : '/dashboard'} replace /> 
               : <AuthPage setUser={setUser} defaultRole="customer" />
           } 
         />

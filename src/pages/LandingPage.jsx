@@ -7,7 +7,7 @@ import { Ship, Users, Shield, Zap, TrendingUp } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function LandingPage() {
+export default function LandingPage({ user }) {
   const container = useRef();
   const navigate = useNavigate();
 
@@ -51,14 +51,16 @@ export default function LandingPage() {
     <div ref={container} style={{ minHeight: '100vh', width: '100%', overflowX: 'hidden', position: 'relative' }}>
       
       {/* Landing Page Navbar */}
-      <nav style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10, maxWidth: '1400px', margin: '0 auto' }}>
-        <div style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Ship size={24} /> Alonpass
-        </div>
-        <button onClick={() => navigate('/auth')} className="btn btn-outline" style={{ borderRadius: '100px', padding: '0.5rem 1.5rem' }}>
-          Sign In
-        </button>
-      </nav>
+      {!user && (
+        <nav style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10, maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Ship size={24} /> Alonpass
+          </div>
+          <button onClick={() => navigate('/auth')} className="btn btn-outline" style={{ borderRadius: '100px', padding: '0.5rem 1.5rem' }}>
+            Sign In
+          </button>
+        </nav>
+      )}
 
       {/* Hero Section */}
       <section style={{ 
@@ -85,8 +87,8 @@ export default function LandingPage() {
         </p>
 
         <div className="hero-cta" style={{ display: 'flex', gap: '1rem' }}>
-          <button onClick={() => navigate('/auth')} className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', borderRadius: '8px' }}>
-            Access System
+          <button onClick={() => window.location.href = 'mailto:sales@alonpass.com'} className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', borderRadius: '8px' }}>
+            Request a Demo
           </button>
         </div>
       </section>
@@ -143,8 +145,8 @@ export default function LandingPage() {
             Join leading maritime operators in replacing manual ledgers with a secure, automated digital infrastructure. Improve efficiency and ensure complete regulatory compliance.
           </p>
           
-          <button onClick={() => navigate('/auth')} className="btn btn-primary" style={{ padding: '1.25rem 3rem', fontSize: '1.1rem', borderRadius: '8px' }}>
-            Access Administrator Portal
+          <button onClick={() => window.location.href = 'mailto:sales@alonpass.com'} className="btn btn-primary" style={{ padding: '1.25rem 3rem', fontSize: '1.1rem', borderRadius: '8px' }}>
+            Contact Sales
           </button>
         </div>
       </section>

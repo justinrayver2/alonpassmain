@@ -1,7 +1,7 @@
 -- Run this entire script in your Supabase SQL Editor
 
 -- 1. Create profiles table linked to auth.users
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users(id) PRIMARY KEY,
   full_name TEXT NOT NULL,
   age INTEGER,
@@ -11,7 +11,7 @@ CREATE TABLE profiles (
 );
 
 -- 2. Create schedules table
-CREATE TABLE schedules (
+CREATE TABLE IF NOT EXISTS schedules (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   origin TEXT NOT NULL,
   destination TEXT NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE schedules (
 );
 
 -- 3. Create announcements table
-CREATE TABLE announcements (
+CREATE TABLE IF NOT EXISTS announcements (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   message TEXT NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE announcements (
 );
 
 -- 4. Create reservations table
-CREATE TABLE reservations (
+CREATE TABLE IF NOT EXISTS reservations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES profiles(id),
   guest_name TEXT,
@@ -58,22 +58,61 @@ ALTER TABLE schedules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE announcements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reservations ENABLE ROW LEVEL SECURITY;
 
--- Create Policies
+-- 1. Create a secure function to get the current user's role
+CREATE OR REPLACE FUNCTION public.get_my_role()
+RETURNS TEXT
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT role FROM public.profiles WHERE id = auth.uid();
+$$;
+
+-- Drop existing policies if any (for safety when re-running)
+DROP POLICY IF EXISTS "Allow public read access to profiles" ON profiles;
+DROP POLICY IF EXISTS "Allow users to insert their own profile" ON profiles;
+DROP POLICY IF EXISTS "Allow users to update their own profile" ON profiles;
+DROP POLICY IF EXISTS "Allow public read access to schedules" ON schedules;
+DROP POLICY IF EXISTS "Allow admins to insert schedules" ON schedules;
+DROP POLICY IF EXISTS "Allow admins to update schedules" ON schedules;
+DROP POLICY IF EXISTS "Allow admins to delete schedules" ON schedules;
+DROP POLICY IF EXISTS "Allow public read access to announcements" ON announcements;
+DROP POLICY IF EXISTS "Allow admins to insert announcements" ON announcements;
+DROP POLICY IF EXISTS "Allow admins to update announcements" ON announcements;
+DROP POLICY IF EXISTS "Allow admins to delete announcements" ON announcements;
+DROP POLICY IF EXISTS "Allow users to view their own reservations and cashiers/admins to view all" ON reservations;
+DROP POLICY IF EXISTS "Allow users to insert reservations" ON reservations;
+DROP POLICY IF EXISTS "Allow users and cashiers to update reservations" ON reservations;
+DROP POLICY IF EXISTS "Allow users and cashiers to delete reservations" ON reservations;
+
+-- Create SECURE Policies
+
+-- PROFILES
+-- Anyone can read profiles (or you can restrict to self + admins)
 CREATE POLICY "Allow public read access to profiles" ON profiles FOR SELECT USING (true);
-CREATE POLICY "Allow users to insert their own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
-CREATE POLICY "Allow users to update their own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+-- Users can only insert their own profile AND their role MUST be 'customer'. 
+-- This prevents a malicious user from passing role='admin' in their signup payload.
+CREATE POLICY "Allow users to insert their own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id AND role = 'customer');
+-- Users can update their own profile (but not change their role), Admins can update any profile.
+CREATE POLICY "Allow users to update their own profile" ON profiles FOR UPDATE USING (auth.uid() = id OR public.get_my_role() = 'admin');
 
+-- SCHEDULES
 CREATE POLICY "Allow public read access to schedules" ON schedules FOR SELECT USING (true);
-CREATE POLICY "Allow admins to insert schedules" ON schedules FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow admins to update schedules" ON schedules FOR UPDATE USING (true);
-CREATE POLICY "Allow admins to delete schedules" ON schedules FOR DELETE USING (true);
+CREATE POLICY "Allow admins to insert schedules" ON schedules FOR INSERT WITH CHECK (public.get_my_role() = 'admin');
+CREATE POLICY "Allow admins to update schedules" ON schedules FOR UPDATE USING (public.get_my_role() = 'admin');
+CREATE POLICY "Allow admins to delete schedules" ON schedules FOR DELETE USING (public.get_my_role() = 'admin');
 
+-- ANNOUNCEMENTS
 CREATE POLICY "Allow public read access to announcements" ON announcements FOR SELECT USING (true);
-CREATE POLICY "Allow admins to insert announcements" ON announcements FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow admins to update announcements" ON announcements FOR UPDATE USING (true);
-CREATE POLICY "Allow admins to delete announcements" ON announcements FOR DELETE USING (true);
+CREATE POLICY "Allow admins to insert announcements" ON announcements FOR INSERT WITH CHECK (public.get_my_role() = 'admin');
+CREATE POLICY "Allow admins to update announcements" ON announcements FOR UPDATE USING (public.get_my_role() = 'admin');
+CREATE POLICY "Allow admins to delete announcements" ON announcements FOR DELETE USING (public.get_my_role() = 'admin');
 
-CREATE POLICY "Allow users to view their own reservations and cashiers/admins to view all" ON reservations FOR SELECT USING (true);
+-- RESERVATIONS
+-- Users can see their own, Cashiers and Admins can see all
+CREATE POLICY "Allow users to view their own reservations and cashiers/admins to view all" ON reservations FOR SELECT USING (auth.uid() = user_id OR public.get_my_role() IN ('cashier', 'admin'));
+-- Users can insert their own reservations
 CREATE POLICY "Allow users to insert reservations" ON reservations FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Allow users and cashiers to update reservations" ON reservations FOR UPDATE USING (true);
-CREATE POLICY "Allow users and cashiers to delete reservations" ON reservations FOR DELETE USING (true);
+-- Cashiers and Admins can update any reservation (e.g., to mark as paid), Users can update their own (e.g. to cancel)
+CREATE POLICY "Allow users and cashiers to update reservations" ON reservations FOR UPDATE USING (public.get_my_role() IN ('cashier', 'admin') OR auth.uid() = user_id);
+-- Only Admins can delete reservations
+CREATE POLICY "Allow admins to delete reservations" ON reservations FOR DELETE USING (public.get_my_role() = 'admin');

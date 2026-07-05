@@ -58,7 +58,7 @@ export default function AuthPage({ defaultRole = 'customer' }) {
             id: data.user.id, 
             full_name: fullName, 
             age: parseInt(age, 10),
-            role: defaultRole 
+            role: 'customer' // Enforce customer role on signup for security
           }
         ]);
         if (profileError) setError(profileError.message);

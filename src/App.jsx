@@ -72,7 +72,7 @@ function App() {
 
   return (
     <Router>
-      {user && <Navbar user={user} setUser={setUser} />}
+      <Navbar user={user} setUser={setUser} />
       <Routes>
         <Route 
           path="/" 

@@ -1,15 +1,16 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Ship, Users, Shield, Zap, TrendingUp } from 'lucide-react';
+import { Ship, Users, Shield, Zap, TrendingUp, X } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function LandingPage({ user }) {
   const container = useRef();
   const navigate = useNavigate();
+  const [legalModal, setLegalModal] = useState(null);
 
   useGSAP(() => {
     // Hero Animations
@@ -49,19 +50,28 @@ export default function LandingPage({ user }) {
 
   return (
     <div ref={container} style={{ minHeight: '100vh', width: '100%', overflowX: 'hidden', position: 'relative' }}>
+      <style>{`
+        .feature-card {
+          transition: all 0.3s ease;
+          border: 1px solid rgba(255,255,255,0.05);
+        }
+        .feature-card:hover {
+          transform: translateY(-10px);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+          border-color: rgba(255,255,255,0.15);
+          background: rgba(255,255,255,0.05);
+        }
+        .footer-link {
+          color: var(--text-secondary);
+          text-decoration: none;
+          transition: color 0.2s ease;
+        }
+        .footer-link:hover {
+          color: var(--primary-color);
+        }
+      `}</style>
       
-      {/* Landing Page Navbar */}
-      {!user && (
-        <nav style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10, maxWidth: '1400px', margin: '0 auto' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Ship size={24} /> Alonpass
-          </div>
-          <button onClick={() => navigate('/auth')} className="btn btn-outline" style={{ borderRadius: '100px', padding: '0.5rem 1.5rem' }}>
-            Sign In
-          </button>
-        </nav>
-      )}
-
+      
       {/* Hero Section */}
       <section style={{ 
         minHeight: '90vh', 
@@ -94,13 +104,13 @@ export default function LandingPage({ user }) {
       </section>
 
       {/* Features Grid */}
-      <section style={{ padding: '8rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <section id="features" style={{ padding: '8rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
           <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem', fontWeight: 700 }}>Engineered for High-Traffic Ports</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>Say goodbye to long queues and hand-written manifests. Alonpass automates the heavy lifting.</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '2rem' }}>
           
           <div className="feature-card glass-panel" style={{ padding: '2.5rem' }}>
             <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'rgba(10,132,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', color: 'var(--primary-color)' }}>
@@ -137,28 +147,82 @@ export default function LandingPage({ user }) {
         </div>
       </section>
 
-      {/* Enterprise CTA Section */}
-      <section className="enterprise-cta" style={{ padding: '6rem 2rem', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'var(--background-color)', textAlign: 'center' }}>
+      {/* Ready to start Section */}
+      <section id="how-it-works" className="enterprise-cta" style={{ padding: '6rem 2rem', borderTop: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(255,255,255,0.02)', textAlign: 'center' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', fontWeight: 700 }}>Ready to Modernize Your Port?</h2>
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', fontWeight: 700 }}>Experience Seamless Maritime Travel</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginBottom: '3rem', lineHeight: 1.6 }}>
-            Join leading maritime operators in replacing manual ledgers with a secure, automated digital infrastructure. Improve efficiency and ensure complete regulatory compliance.
+            Whether you're managing port operations or booking your next trip, Alonpass provides a unified platform to make maritime travel fast, secure, and hassle-free.
           </p>
           
-          <button onClick={() => window.location.href = 'mailto:sales@alonpass.com'} className="btn btn-primary" style={{ padding: '1.25rem 3rem', fontSize: '1.1rem', borderRadius: '8px' }}>
-            Contact Sales
+          <button onClick={() => navigate(user ? (user.role === 'admin' ? '/admin' : user.role === 'cashier' ? '/cashier' : '/dashboard') : '/auth')} className="btn btn-primary" style={{ padding: '1.25rem 3rem', fontSize: '1.1rem', borderRadius: '8px' }}>
+            Get Started Now
           </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{ padding: '3rem 2rem', textAlign: 'center', color: 'var(--text-secondary)', borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-          <Ship size={20} />
-          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Alonpass</span>
+      <footer style={{ padding: '4rem 2rem', borderTop: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'var(--background-color)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '3rem', paddingBottom: '3rem' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              <Ship size={24} color="var(--primary-color)" />
+              <span style={{ fontWeight: 700, fontSize: '1.25rem', color: 'var(--text-primary)' }}>Alonpass</span>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.9rem' }}>
+              Next-generation maritime digital infrastructure for ports and passengers alike.
+            </p>
+          </div>
+          <div>
+            <h4 style={{ fontWeight: 600, marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Navigation</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <a href="/" className="footer-link">Home</a>
+              <a href="/#features" className="footer-link">Features</a>
+              <a href="/#how-it-works" className="footer-link">How it Works</a>
+            </div>
+          </div>
+          <div>
+            <h4 style={{ fontWeight: 600, marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Legal</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <a href="#" onClick={(e) => { e.preventDefault(); setLegalModal('privacy'); }} className="footer-link">Privacy Policy</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); setLegalModal('terms'); }} className="footer-link">Terms of Service</a>
+            </div>
+          </div>
         </div>
-        <p>© 2026 Alonpass. All rights reserved.</p>
+        <div style={{ textAlign: 'center', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+          <p>© 2026 Alonpass. All rights reserved.</p>
+        </div>
       </footer>
+
+      {/* Legal Modal */}
+      {legalModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }} onClick={() => setLegalModal(null)}>
+          <div className="glass-panel animate-fade-in" style={{ maxWidth: '600px', width: '100%', position: 'relative', border: '1px solid rgba(255,255,255,0.1)', background: 'var(--card-bg)' }} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setLegalModal(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'color 0.2s' }}>
+              <X size={24} />
+            </button>
+            <h2 style={{ marginBottom: '1.5rem', fontSize: '1.8rem', fontWeight: 700 }}>
+              {legalModal === 'privacy' ? 'Privacy Policy' : 'Terms of Service'}
+            </h2>
+            <div style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '1.05rem' }}>
+              {legalModal === 'privacy' ? (
+                <>
+                  <p style={{ marginBottom: '1.5rem' }}>We take your privacy seriously. Alonpass only collects information that is absolutely necessary to process your maritime bookings, verify identity, and ensure regulatory compliance with the Coast Guard.</p>
+                  <p>Your data is encrypted in transit and at rest using enterprise-grade security protocols. We will never sell or share your personal information with unauthorized third parties.</p>
+                </>
+              ) : (
+                <>
+                  <p style={{ marginBottom: '1.5rem' }}>Welcome to Alonpass. By using our digital infrastructure, you agree to comply with all local maritime laws and terminal regulations set forth by the port authorities.</p>
+                  <p>Tickets booked through the platform are subject to the specific refund, cancellation, and boarding policies of the operating maritime company and terminal.</p>
+                </>
+              )}
+            </div>
+            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="btn btn-primary" onClick={() => setLegalModal(null)}>Understood</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

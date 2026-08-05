@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Ship, Waves } from 'lucide-react';
+import { Ship, Waves, CheckCircle, Circle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function AuthPage({ defaultRole = 'customer' }) {
@@ -93,7 +93,7 @@ export default function AuthPage({ defaultRole = 'customer' }) {
           )}
 
           {!isLogin ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 1rem' }}>
+            <div className="responsive-grid" style={{ gap: '0 1rem' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Full Name</label>
                 <input 
@@ -133,7 +133,22 @@ export default function AuthPage({ defaultRole = 'customer' }) {
                   placeholder="Enter your password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  style={{ marginBottom: '0.5rem' }}
                 />
+                <div style={{ fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: /(?=.*[A-Z])/.test(password) ? 'var(--success-color)' : 'var(--text-secondary)' }}>
+                    {/(?=.*[A-Z])/.test(password) ? <CheckCircle size={14} /> : <Circle size={14} />} 
+                    At least one capital letter
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: /(?=.*[0-9])/.test(password) ? 'var(--success-color)' : 'var(--text-secondary)' }}>
+                    {/(?=.*[0-9])/.test(password) ? <CheckCircle size={14} /> : <Circle size={14} />} 
+                    At least one number
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: /(?=.*[!@#$%^&*(),.?":{}|<>])/.test(password) ? 'var(--success-color)' : 'var(--text-secondary)' }}>
+                    {/(?=.*[!@#$%^&*(),.?":{}|<>])/.test(password) ? <CheckCircle size={14} /> : <Circle size={14} />} 
+                    At least one special character
+                  </div>
+                </div>
               </div>
             </div>
           ) : (

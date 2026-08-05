@@ -115,7 +115,7 @@ export default function CashierDashboard({ user }) {
 
   return (
     <div className="container animate-fade-in" style={{ padding: '2rem 1.5rem' }}>
-      <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header className="dashboard-header">
         <div>
           <h1 style={{ color: 'var(--primary-color)' }}>Cashier Dashboard {user?.assigned_port ? `(${user.assigned_port})` : ''}</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Manage reservations and collect payments.</p>

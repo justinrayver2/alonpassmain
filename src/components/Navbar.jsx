@@ -21,9 +21,9 @@ export default function Navbar({ user, setUser }) {
         
         {/* Center Navigation Links (Desktop) */}
         <div className="nav-links desktop-actions" style={{ display: 'flex', gap: '2rem', alignItems: 'center', fontWeight: 500 }}>
+          <Link to="/" className="nav-link" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Home</Link>
           {!user && (
             <>
-              <Link to="/" className="nav-link" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Home</Link>
               <a href="/#features" className="nav-link" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Features</a>
               <a href="/#how-it-works" className="nav-link" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>How it Works</a>
             </>
@@ -45,10 +45,6 @@ export default function Navbar({ user, setUser }) {
         {user ? (
           <>
             <div className="navbar-actions desktop-actions">
-              <Link to="/" className="btn" style={{ background: 'transparent', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
-                <Home size={18} />
-                <span style={{ fontWeight: 500 }}>Home</span>
-              </Link>
               <div className="user-profile-badge">
                 <div className="user-avatar">
                   {user.fullName ? user.fullName.charAt(0).toUpperCase() : <User size={16} />}

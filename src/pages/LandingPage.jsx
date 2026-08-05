@@ -96,11 +96,6 @@ export default function LandingPage({ user }) {
           A comprehensive digital infrastructure designed for modern ports. Automate ticketing, manage multi-terminal fleets, and generate real-time Coast Guard manifests with enterprise-grade reliability.
         </p>
 
-        <div className="hero-cta" style={{ display: 'flex', gap: '1rem' }}>
-          <button onClick={() => window.location.href = 'mailto:sales@alonpass.com'} className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem', borderRadius: '8px' }}>
-            Request a Demo
-          </button>
-        </div>
       </section>
 
       {/* Features Grid */}
@@ -110,7 +105,7 @@ export default function LandingPage({ user }) {
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>Say goodbye to long queues and hand-written manifests. Alonpass automates the heavy lifting.</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '2rem' }}>
+        <div className="responsive-grid">
           
           <div className="feature-card glass-panel" style={{ padding: '2.5rem' }}>
             <div style={{ width: '50px', height: '50px', borderRadius: '12px', background: 'rgba(10,132,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', color: 'var(--primary-color)' }}>

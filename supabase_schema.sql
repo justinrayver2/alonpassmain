@@ -82,7 +82,7 @@ DROP POLICY IF EXISTS "Allow admins to delete announcements" ON announcements;
 DROP POLICY IF EXISTS "Allow users to view their own reservations and cashiers/admins to view all" ON reservations;
 DROP POLICY IF EXISTS "Allow users to insert reservations" ON reservations;
 DROP POLICY IF EXISTS "Allow users and cashiers to update reservations" ON reservations;
-DROP POLICY IF EXISTS "Allow users and cashiers to delete reservations" ON reservations;
+DROP POLICY IF EXISTS "Allow admins to delete reservations" ON reservations;
 
 -- Create SECURE Policies
 
@@ -110,8 +110,8 @@ CREATE POLICY "Allow admins to delete announcements" ON announcements FOR DELETE
 -- RESERVATIONS
 -- Users can see their own, Cashiers and Admins can see all
 CREATE POLICY "Allow users to view their own reservations and cashiers/admins to view all" ON reservations FOR SELECT USING (auth.uid() = user_id OR public.get_my_role() IN ('cashier', 'admin'));
--- Users can insert their own reservations
-CREATE POLICY "Allow users to insert reservations" ON reservations FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- Users can insert their own reservations, and staff (cashiers/admins) can insert walk-in reservations
+CREATE POLICY "Allow users to insert reservations" ON reservations FOR INSERT WITH CHECK (auth.uid() = user_id OR public.get_my_role() IN ('cashier', 'admin'));
 -- Cashiers and Admins can update any reservation (e.g., to mark as paid), Users can update their own (e.g. to cancel)
 CREATE POLICY "Allow users and cashiers to update reservations" ON reservations FOR UPDATE USING (public.get_my_role() IN ('cashier', 'admin') OR auth.uid() = user_id);
 -- Only Admins can delete reservations

@@ -80,7 +80,31 @@ export default function AdminDashboard() {
     
     if (schedRes.data) setSchedules(schedRes.data.map(s => ({...s, departureTime: formatTime(s.departure_time), arrivalTime: formatTime(s.arrival_time), basePrice: s.base_price, discountedPrice: s.discounted_price})));
     if (annRes.data) setAnnouncements(annRes.data);
-    if (resRes.data) setReservations(resRes.data.map(r => ({...r, scheduleId: r.schedule_id, totalPrice: r.total_price, totalPax: r.total_pax})));
+    if (resRes.data) {
+      const now = new Date();
+      setReservations(resRes.data.map(r => {
+        let currentStatus = r.status;
+        if ((currentStatus === 'pending' || currentStatus === 'paid') && schedRes.data) {
+          const sched = schedRes.data.find(s => s.id === r.schedule_id);
+          if (sched) {
+            const scheduleDateTime = new Date(`${r.date}T${sched.departure_time}`);
+            if (now > scheduleDateTime) {
+              currentStatus = 'expired';
+              if (r.status === 'pending') {
+                supabase.from('reservations').update({ status: 'expired' }).eq('id', r.id).then();
+              }
+            }
+          }
+        }
+        return {
+          ...r, 
+          scheduleId: r.schedule_id, 
+          totalPrice: r.total_price, 
+          totalPax: r.total_pax,
+          status: currentStatus
+        };
+      }));
+    }
   };
 
   // Calculate Metrics
@@ -90,6 +114,7 @@ export default function AdminDashboard() {
     let totalPaxBoarded = 0;
     let paidCount = 0;
     let pendingCount = 0;
+    let expiredCount = 0;
     
     const routeRevenue = {};
 
@@ -105,8 +130,10 @@ export default function AdminDashboard() {
           if (!routeRevenue[routeName]) routeRevenue[routeName] = 0;
           routeRevenue[routeName] += Number(res.totalPrice) || 0;
         }
-      } else {
+      } else if (res.status === 'pending') {
         pendingCount++;
+      } else if (res.status === 'expired') {
+        expiredCount++;
       }
     });
 
@@ -117,13 +144,14 @@ export default function AdminDashboard() {
 
     const statusData = [
       { name: 'Paid', value: paidCount },
-      { name: 'Pending', value: pendingCount }
-    ];
+      { name: 'Pending', value: pendingCount },
+      { name: 'Expired', value: expiredCount }
+    ].filter(d => d.value > 0);
 
-    return { totalRevenue, totalBookings, totalPaxBoarded, paidCount, pendingCount, routeData, statusData };
+    return { totalRevenue, totalBookings, totalPaxBoarded, paidCount, pendingCount, expiredCount, routeData, statusData };
   }, [schedules, reservations]);
 
-  const COLORS = ['var(--primary-color)', 'var(--text-secondary)'];
+  const COLORS = ['var(--success-color)', 'var(--text-secondary)', '#ff9500'];
 
   const handleAddSchedule = async (e) => {
     e.preventDefault();

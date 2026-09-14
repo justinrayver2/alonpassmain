@@ -76,16 +76,33 @@ export default function CustomerDashboard({ user }) {
     ]);
 
     if (resRes.data) {
-      setReservations(resRes.data.map(r => ({
-        ...r,
-        scheduleId: r.schedule_id,
-        ticketNumber: r.ticket_number,
-        totalPrice: r.total_price,
-        totalPax: r.total_pax,
-        paxCounts: r.pax_counts,
-        date: r.date,
-        passengerNames: r.passenger_names || []
-      })));
+      const now = new Date();
+      setReservations(resRes.data.map(r => {
+        let currentStatus = r.status;
+        if ((currentStatus === 'pending' || currentStatus === 'paid') && schedRes.data) {
+          const sched = schedRes.data.find(s => s.id === r.schedule_id);
+          if (sched) {
+            const scheduleDateTime = new Date(`${r.date}T${sched.departure_time}`);
+            if (now > scheduleDateTime) {
+              currentStatus = 'expired';
+              if (r.status === 'pending') {
+                supabase.from('reservations').update({ status: 'expired' }).eq('id', r.id).then();
+              }
+            }
+          }
+        }
+        return {
+          ...r,
+          scheduleId: r.schedule_id,
+          ticketNumber: r.ticket_number,
+          totalPrice: r.total_price,
+          totalPax: r.total_pax,
+          paxCounts: r.pax_counts,
+          date: r.date,
+          passengerNames: r.passenger_names || [],
+          status: currentStatus
+        };
+      }));
     }
     if (schedRes.data) {
       setSchedules(schedRes.data.map(s => ({
@@ -336,9 +353,10 @@ export default function CustomerDashboard({ user }) {
                         const schedule = schedules.find(s => s.id === res.scheduleId);
                         const isPaid = res.status === 'paid';
                         const isCancelled = res.status === 'cancelled';
+                        const isExpired = res.status === 'expired';
 
                         return (
-                          <tr key={res.id} style={{ borderBottom: idx === myReservations.length - 1 ? 'none' : '1px solid rgba(0,0,0,0.05)', opacity: isCancelled ? 0.6 : 1 }}>
+                          <tr key={res.id} style={{ borderBottom: idx === myReservations.length - 1 ? 'none' : '1px solid rgba(0,0,0,0.05)', opacity: (isCancelled || isExpired) ? 0.6 : 1 }}>
                             <td data-label="Ticket No." style={{ padding: '1rem', fontWeight: 600, color: 'var(--primary-color)' }}>{res.ticketNumber}</td>
                             <td data-label="Route" style={{ padding: '1rem' }}>
                               <div style={{ fontWeight: 500 }}>{schedule?.origin} to {schedule?.destination}</div>
@@ -354,19 +372,19 @@ export default function CustomerDashboard({ user }) {
                               ₱{res.totalPrice}
                             </td>
                             <td data-label="Status" style={{ padding: '1rem' }}>
-                              <span style={{
-                                padding: '0.25rem 0.75rem',
-                                borderRadius: '20px',
-                                fontSize: '0.8rem',
-                                fontWeight: 600,
-                                backgroundColor: isPaid ? 'rgba(52, 199, 89, 0.1)' : isCancelled ? 'rgba(255, 59, 48, 0.1)' : 'rgba(134, 134, 139, 0.1)',
-                                color: isPaid ? 'var(--success-color)' : isCancelled ? 'var(--error-color)' : 'var(--text-secondary)'
-                              }}>
-                                {res.status.toUpperCase()}
-                              </span>
+                                <span style={{
+                                  padding: '0.25rem 0.75rem',
+                                  borderRadius: '20px',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 600,
+                                  backgroundColor: isPaid ? 'rgba(52, 199, 89, 0.1)' : isCancelled ? 'rgba(255, 59, 48, 0.1)' : isExpired ? 'rgba(255, 149, 0, 0.1)' : 'rgba(134, 134, 139, 0.1)',
+                                  color: isPaid ? 'var(--success-color)' : isCancelled ? 'var(--error-color)' : isExpired ? '#ff9500' : 'var(--text-secondary)'
+                                }}>
+                                  {res.status.toUpperCase()}
+                                </span>
                             </td>
                             <td data-label="Actions" style={{ padding: '1rem' }}>
-                              {!isPaid && !isCancelled ? (
+                              {!isPaid && !isCancelled && !isExpired ? (
                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                   <button onClick={() => openEdit(res)} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} title="Edit Ticket">
                                     <Edit size={16} />
@@ -380,7 +398,7 @@ export default function CustomerDashboard({ user }) {
                                 </div>
                               ) : (
                                 <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                                  {isPaid ? "Locked (Paid)" : "Locked (Cancelled)"}
+                                  {isPaid ? "Locked (Paid)" : isCancelled ? "Locked (Cancelled)" : "Locked (Expired)"}
                                 </span>
                               )}
                             </td>

@@ -67,6 +67,51 @@ AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid();
 $$;
 
+-- 1b. Prevent Role Tampering Trigger
+CREATE OR REPLACE FUNCTION public.prevent_role_update()
+RETURNS trigger AS $$
+BEGIN
+  -- If the role is being changed, ensure the current user is an admin
+  IF NEW.role IS DISTINCT FROM OLD.role AND public.get_my_role() != 'admin' THEN
+    RAISE EXCEPTION 'Security Violation: You cannot change your own role.';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS prevent_role_update_trigger ON profiles;
+CREATE TRIGGER prevent_role_update_trigger
+BEFORE UPDATE ON profiles
+FOR EACH ROW EXECUTE FUNCTION prevent_role_update();
+
+-- 1c. Prevent Reservation Tampering Trigger
+CREATE OR REPLACE FUNCTION public.prevent_reservation_tampering()
+RETURNS trigger AS $$
+BEGIN
+  -- Admins and Cashiers can bypass these restrictions
+  IF public.get_my_role() IN ('admin', 'cashier') THEN
+    RETURN NEW;
+  END IF;
+  
+  -- Customers attempting to modify their reservation
+  IF NEW.total_price != OLD.total_price OR NEW.total_pax != OLD.total_pax OR NEW.pax_counts::text != OLD.pax_counts::text OR NEW.schedule_id != OLD.schedule_id THEN
+    RAISE EXCEPTION 'Security Violation: You cannot modify pricing, pax, or schedule details after booking.';
+  END IF;
+  
+  -- Customers can only update status to 'cancelled'
+  IF NEW.status != OLD.status AND NEW.status != 'cancelled' THEN
+    RAISE EXCEPTION 'Security Violation: Customers can only cancel their reservations.';
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS prevent_reservation_tampering_trigger ON reservations;
+CREATE TRIGGER prevent_reservation_tampering_trigger
+BEFORE UPDATE ON reservations
+FOR EACH ROW EXECUTE FUNCTION prevent_reservation_tampering();
+
 -- Drop existing policies if any (for safety when re-running)
 DROP POLICY IF EXISTS "Allow public read access to profiles" ON profiles;
 DROP POLICY IF EXISTS "Allow users to insert their own profile" ON profiles;

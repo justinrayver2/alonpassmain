@@ -4,7 +4,24 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>app</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Alonpass</title>
+    <style>
+      body { margin: 0; background: #0f0f11; font-family: 'Inter', sans-serif; }
+      #initial-loader {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        display: flex; flex-direction: column; justify-content: center; alignItems: center;
+        background: #0f0f11; color: #fff; z-index: 9999;
+      }
+      .spinner {
+        width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
+        border-top-color: #007bff; border-radius: 50%;
+        animation: spin 1s linear infinite; margin-bottom: 1rem;
+      }
+      @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
   </head>
   <body>
     <div id="root"></div>

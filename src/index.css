@@ -72,12 +72,21 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
   border-radius: var(--border-radius);
   padding: 2rem;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
   .glass-panel {
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  }
+  .glass-panel:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   }
 }
 
@@ -169,7 +178,8 @@ input:focus, select:focus {
 .btn-primary:hover {
   background-color: var(--accent-color);
   color: var(--background-color);
-  transform: scale(0.98);
+  transform: scale(0.96);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
 
 .btn-outline {
@@ -180,6 +190,7 @@ input:focus, select:focus {
 
 .btn-outline:hover {
   background-color: rgba(0, 0, 0, 0.05);
+  transform: scale(0.96);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -249,8 +260,8 @@ input:focus, select:focus {
 }
 
 .user-profile-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
 .user-profile-text {
@@ -521,12 +532,21 @@ input:focus, select:focus {
     padding: 0.5rem 1rem !important;
     border: 1px solid rgba(0,0,0,0.05) !important;
     box-shadow: 0 4px 15px rgba(0,0,0,0.02) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .responsive-table tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08) !important;
   }
 
   @media (prefers-color-scheme: dark) {
     .responsive-table tr {
       border: 1px solid rgba(255,255,255,0.08) !important;
       box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+    }
+    .responsive-table tr:hover {
+      box-shadow: 0 6px 24px rgba(0,0,0,0.6) !important;
     }
   }
 
